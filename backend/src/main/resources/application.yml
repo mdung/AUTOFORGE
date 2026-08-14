@@ -1,0 +1,67 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: autoforge-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5433/autoforge
+    username: autoforge_user
+    password: autoforge_pass
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000
+
+# AWS S3 / MinIO Configuration
+aws:
+  s3:
+    endpoint: http://localhost:9000
+    access-key: minioadmin
+    secret-key: minioadmin
+    region: us-east-1
+    bucket-name: autoforge-docs
+
+# Security configuration
+security:
+  jwt:
+    # Base64 encoded secret key (512-bit)
+    secret: dGhpc2lzYW5leHRyZW1lbHlzZWN1cmVhbmRsb25nc2VjcmV0a2V5dGhhdHNob3VsZGJldXNlZGZvcmF1dG9mb3JnZW12cHNlY3VyaXR5YW5kYXV0aGVudGljYXRpb24=
+    expiration-ms: 86400000 # 24 hours
+
+# Payment Gateway Configurations (Sandbox keys)
+payment:
+  vnpay:
+    url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+    tmn-code: 21M1VHUS
+    hash-secret: HP8E125Q22C0G5YV2J6IUNJ33L1B43I8
+    return-url: http://localhost:8080/api/v1/public/payments/vnpay-callback
+  stripe:
+    secret-key: sk_test_mockkey
+
+# AI Copilot Configuration (Google Gemini API)
+ai:
+  gemini:
+    api-key: ${GEMINI_API_KEY:DEMO_KEY}
+
+logging:
+  level:
+    root: INFO
+    com.autoforge: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: DEBUG

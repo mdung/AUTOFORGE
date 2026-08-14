@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/autoforge_test
+    username: autoforge_user
+    password: autoforge_pass
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  flyway:
+    enabled: false
+
+logging:
+  level:
+    root: WARN
+    com.autoforge: INFO
