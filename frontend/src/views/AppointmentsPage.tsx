@@ -157,8 +157,8 @@ export default function AppointmentsPage() {
                   <td>{appt.vehicleDesc}</td>
                   <td>{appt.date}</td>
                   <td>{appt.time}</td>
-                  <td>{appt.type}</td>
-                  <td><span className={`badge badge-${appt.status?.toLowerCase()}`}>{appt.status}</span></td>
+                  <td>{String(t(`serviceTypes.${appt.type}`, appt.type || ''))}</td>
+                  <td><span className={`badge badge-${appt.status?.toLowerCase()}`}>{String(t(`status.${appt.status}`, appt.status || ''))}</span></td>
                 </tr>
               ))
             )}

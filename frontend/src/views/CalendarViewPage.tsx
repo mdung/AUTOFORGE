@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, Plus, Filter } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface Appointment {
@@ -17,17 +17,28 @@ interface CalendarViewPageProps {
   onAddAppointment?: () => void;
 }
 
-export default function CalendarViewPage({ appointments, onAddAppointment }: CalendarViewPageProps) {
+export default function CalendarViewPage({ appointments }: CalendarViewPageProps) {
   const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('week');
-  const [currentDate, setCurrentDate] = useState<Date>(new Date('2026-08-12')); // Seeding at date of demo data
+  // Seed at 2026-08-14 where demo data is populated
+  const [currentDate, setCurrentDate] = useState<Date>(new Date('2026-08-14'));
+
+  const formatShortDate = (date: Date) => {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  const getAppointmentsForDate = (dateStr: string) => {
+    return appointments.filter(appt => appt.date === dateStr);
+  };
 
   const getWeekDays = (start: Date) => {
     const days = [];
     const dateCopy = new Date(start);
-    // Find monday of current date
     const day = dateCopy.getDay();
-    const diff = dateCopy.getDate() - day + (day === 0 ? -6 : 1); 
+    const diff = dateCopy.getDate() - day + (day === 0 ? -6 : 1);
     dateCopy.setDate(diff);
 
     for (let i = 0; i < 7; i++) {
@@ -37,15 +48,27 @@ export default function CalendarViewPage({ appointments, onAddAppointment }: Cal
     return days;
   };
 
+  const getMonthGridDays = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const day = firstDay.getDay();
+    const diff = firstDay.getDate() - day + (day === 0 ? -6 : 1);
+    
+    const startDate = new Date(firstDay);
+    startDate.setDate(diff);
+
+    const days: Date[] = [];
+    const curr = new Date(startDate);
+    for (let i = 0; i < 35; i++) {
+      days.push(new Date(curr));
+      curr.setDate(curr.getDate() + 1);
+    }
+    return days;
+  };
+
   const weekDays = getWeekDays(currentDate);
-
-  const formatShortDate = (date: Date) => {
-    return date.toISOString().split('T')[0];
-  };
-
-  const getAppointmentsForDate = (dateStr: string) => {
-    return appointments.filter(appt => appt.date === dateStr);
-  };
+  const monthDays = getMonthGridDays(currentDate);
 
   const handlePrev = () => {
     const newDate = new Date(currentDate);
@@ -71,91 +94,109 @@ export default function CalendarViewPage({ appointments, onAddAppointment }: Cal
     setCurrentDate(newDate);
   };
 
+  const handleSelectDay = (day: Date) => {
+    setCurrentDate(day);
+    setViewMode('day');
+  };
+
   return (
-    <div className="bg-slate-900 text-slate-100 p-6 rounded-2xl shadow-xl border border-slate-800">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <CalendarIcon className="w-8 h-8 text-indigo-400" />
-          <h2 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-            {t('navigation.appointments', 'Lịch hẹn & Bay dịch vụ')}
+    <div className="card" style={{ padding: '24px' }}>
+      {/* Top Header Controls */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <CalendarIcon size={28} style={{ color: 'var(--primary)' }} />
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>
+            {t('calendar.title')}
           </h2>
         </div>
         
-        <div className="flex items-center bg-slate-800/80 rounded-xl p-1 border border-slate-700">
+        <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'var(--bg-surface-elevated)', borderRadius: '10px', padding: '4px', border: '1px solid var(--border-color)' }}>
           <button 
             onClick={() => setViewMode('day')}
-            className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${viewMode === 'day' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}
+            className="btn"
+            style={{ padding: '6px 16px', fontSize: '0.85rem', backgroundColor: viewMode === 'day' ? 'var(--primary)' : 'transparent', color: viewMode === 'day' ? '#fff' : 'var(--text-secondary)' }}
           >
-            {t('calendar.day', 'Ngày')}
+            {t('calendar.day')}
           </button>
           <button 
             onClick={() => setViewMode('week')}
-            className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${viewMode === 'week' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}
+            className="btn"
+            style={{ padding: '6px 16px', fontSize: '0.85rem', backgroundColor: viewMode === 'week' ? 'var(--primary)' : 'transparent', color: viewMode === 'week' ? '#fff' : 'var(--text-secondary)' }}
           >
-            {t('calendar.week', 'Tuần')}
+            {t('calendar.week')}
           </button>
           <button 
             onClick={() => setViewMode('month')}
-            className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${viewMode === 'month' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}
+            className="btn"
+            style={{ padding: '6px 16px', fontSize: '0.85rem', backgroundColor: viewMode === 'month' ? 'var(--primary)' : 'transparent', color: viewMode === 'month' ? '#fff' : 'var(--text-secondary)' }}
           >
-            {t('calendar.month', 'Tháng')}
+            {t('calendar.month')}
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button onClick={handlePrev} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors" aria-label="Previous">
-            <ChevronLeft className="w-5 h-5" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button onClick={handlePrev} className="btn btn-secondary" style={{ padding: '8px 12px' }} aria-label="Previous">
+            <ChevronLeft size={18} />
           </button>
-          <span className="font-semibold px-4 text-slate-200">
-            {currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+          <span style={{ fontWeight: 700, padding: '0 12px', fontSize: '1rem', minWidth: '160px', textAlign: 'center' }}>
+            {viewMode === 'day'
+              ? currentDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+              : currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
           </span>
-          <button onClick={handleNext} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors" aria-label="Next">
-            <ChevronRight className="w-5 h-5" />
+          <button onClick={handleNext} className="btn btn-secondary" style={{ padding: '8px 12px' }} aria-label="Next">
+            <ChevronRight size={18} />
           </button>
         </div>
       </div>
 
+      {/* WEEK VIEW */}
       {viewMode === 'week' && (
-        <div className="grid grid-cols-7 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '12px' }}>
           {weekDays.map((day, idx) => {
             const dateStr = formatShortDate(day);
             const appts = getAppointmentsForDate(dateStr);
-            const isToday = formatShortDate(new Date()) === dateStr;
+            const isSelected = formatShortDate(currentDate) === dateStr;
 
             return (
-              <div key={idx} className={`bg-slate-800/40 rounded-xl p-4 min-h-[300px] border transition-all duration-300 hover:bg-slate-800/75 ${isToday ? 'border-indigo-500/50 shadow-lg shadow-indigo-500/5' : 'border-slate-800/80'}`}>
-                <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
-                  <span className="text-xs uppercase font-semibold text-slate-400">
+              <div 
+                key={idx} 
+                onClick={() => handleSelectDay(day)}
+                style={{ 
+                  backgroundColor: 'var(--bg-surface-elevated)', 
+                  borderRadius: '12px', 
+                  padding: '12px', 
+                  minHeight: '340px', 
+                  cursor: 'pointer',
+                  border: isSelected ? '2px solid var(--primary)' : '1px solid var(--border-color)',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid var(--border-color)' }}>
+                  <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)' }}>
                     {day.toLocaleDateString(undefined, { weekday: 'short' })}
                   </span>
-                  <span className={`w-7 h-7 flex items-center justify-center rounded-full text-sm font-bold ${isToday ? 'bg-indigo-600 text-white shadow' : 'text-slate-200'}`}>
+                  <span style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontSize: '0.85rem', fontWeight: 700, backgroundColor: isSelected ? 'var(--primary)' : 'transparent', color: isSelected ? '#fff' : 'var(--text-primary)' }}>
                     {day.getDate()}
                   </span>
                 </div>
 
-                <div className="space-y-3">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {appts.map((appt) => (
                     <div 
                       key={appt.id} 
-                      className={`p-3 rounded-lg text-xs border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
-                        appt.status === 'ARRIVED' 
-                          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300' 
-                          : appt.status === 'CONFIRMED' 
-                            ? 'bg-blue-500/10 border-blue-500/20 text-blue-300' 
-                            : 'bg-amber-500/10 border-amber-500/20 text-amber-300'
-                      }`}
+                      style={{ padding: '8px 10px', borderRadius: '8px', fontSize: '0.75rem', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface)' }}
                     >
-                      <div className="font-semibold truncate">{appt.customerName}</div>
-                      <div className="text-slate-400 mt-1 truncate">{appt.vehicleDesc}</div>
-                      <div className="flex items-center gap-1 mt-2 text-[10px] text-slate-400">
-                        <Clock className="w-3 h-3" />
-                        <span>{appt.time} - {appt.type}</span>
+                      <div style={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{appt.customerName}</div>
+                      <div style={{ color: 'var(--text-secondary)', marginTop: '2px', fontSize: '0.7rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{appt.vehicleDesc}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px', fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                        <Clock size={11} />
+                        <span>{appt.time} - {String(t(`serviceTypes.${appt.type}`, appt.type || ''))}</span>
                       </div>
                     </div>
                   ))}
                   {appts.length === 0 && (
-                    <div className="text-center text-slate-600 text-xs py-8">
-                      {t('calendar.no_appts', 'Không có lịch')}
+                    <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem', padding: '40px 0' }}>
+                      {t('calendar.no_appts')}
                     </div>
                   )}
                 </div>
@@ -165,55 +206,124 @@ export default function CalendarViewPage({ appointments, onAddAppointment }: Cal
         </div>
       )}
 
+      {/* DAY VIEW */}
       {viewMode === 'day' && (
-        <div className="bg-slate-850 rounded-2xl border border-slate-800 p-6">
-          <div className="text-lg font-semibold mb-4 text-slate-200 border-b border-slate-800 pb-2 flex items-center justify-between">
-            <span>{currentDate.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}</span>
-            <span className="text-xs px-2.5 py-1 bg-slate-800 text-indigo-400 rounded-full border border-slate-700">
-              {getAppointmentsForDate(formatShortDate(currentDate)).length} {t('calendar.appointments_unit', 'lịch hẹn')}
+        <div style={{ backgroundColor: 'var(--bg-surface-elevated)', borderRadius: '16px', padding: '24px', border: '1px solid var(--border-color)' }}>
+          <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{currentDate.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            <span className="badge badge-requested" style={{ fontSize: '0.85rem', padding: '6px 12px' }}>
+              {getAppointmentsForDate(formatShortDate(currentDate)).length} {t('calendar.appointments_unit')}
             </span>
           </div>
 
-          <div className="space-y-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {getAppointmentsForDate(formatShortDate(currentDate)).map((appt) => (
               <div 
                 key={appt.id} 
-                className="flex items-center justify-between p-4 bg-slate-800/30 hover:bg-slate-800/60 border border-slate-800 rounded-xl transition-all duration-200"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '12px' }}
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-slate-800 flex flex-col items-center justify-center text-xs font-semibold text-slate-400 border border-slate-700">
-                    <Clock className="w-4 h-4 text-indigo-400 mb-0.5" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ width: '54px', height: '54px', borderRadius: '10px', backgroundColor: 'var(--bg-surface-elevated)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary)', border: '1px solid var(--border-color)' }}>
+                    <Clock size={16} />
                     {appt.time}
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-100">{appt.customerName}</h4>
-                    <p className="text-slate-400 text-sm">{appt.vehicleDesc} • <span className="text-slate-500">{appt.type}</span></p>
+                    <h4 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '2px' }}>{appt.customerName}</h4>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{appt.vehicleDesc} • <span style={{ color: 'var(--text-muted)' }}>{String(t(`serviceTypes.${appt.type}`, appt.type || ''))}</span></p>
                   </div>
                 </div>
 
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${
-                  appt.status === 'ARRIVED' 
-                    ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' 
-                    : appt.status === 'CONFIRMED' 
-                      ? 'bg-blue-500/10 border border-blue-500/20 text-blue-400' 
-                      : 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
-                }`}>
-                  {appt.status}
+                <span className={`badge badge-${appt.status?.toLowerCase()}`} style={{ fontSize: '0.8rem', padding: '6px 12px' }}>
+                  {String(t(`status.${appt.status}`, appt.status || ''))}
                 </span>
               </div>
             ))}
             {getAppointmentsForDate(formatShortDate(currentDate)).length === 0 && (
-              <div className="text-center text-slate-500 py-12">
-                {t('calendar.no_appts_day', 'Không có lịch hẹn nào được lên lịch cho ngày hôm nay')}
+              <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '60px 0', fontSize: '0.95rem' }}>
+                {t('calendar.no_appts_day')}
               </div>
             )}
           </div>
         </div>
       )}
 
+      {/* MONTH VIEW */}
       {viewMode === 'month' && (
-        <div className="bg-slate-850 rounded-2xl border border-slate-800 p-6 text-center text-slate-400 py-16">
-          {t('calendar.month_view_fallback', 'Vui lòng chọn chế độ Tuần hoặc Ngày để xem và điều phối chi tiết công việc của xưởng dịch vụ.')}
+        <div>
+          {/* Month Header Days */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', marginBottom: '8px', textAlign: 'center' }}>
+            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+              <div key={day} style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', padding: '8px 0' }}>
+                {day}
+              </div>
+            ))}
+          </div>
+
+          {/* Month Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
+            {monthDays.map((day, idx) => {
+              const dateStr = formatShortDate(day);
+              const appts = getAppointmentsForDate(dateStr);
+              const isCurrentMonth = day.getMonth() === currentDate.getMonth();
+              const isToday = formatShortDate(new Date()) === dateStr;
+
+              return (
+                <div
+                  key={idx}
+                  onClick={() => handleSelectDay(day)}
+                  style={{
+                    backgroundColor: isCurrentMonth ? 'var(--bg-surface-elevated)' : 'var(--bg-surface)',
+                    opacity: isCurrentMonth ? 1 : 0.4,
+                    borderRadius: '10px',
+                    padding: '8px',
+                    minHeight: '100px',
+                    cursor: 'pointer',
+                    border: isToday ? '2px solid var(--primary)' : '1px solid var(--border-color)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: isToday ? 800 : 600, color: isToday ? 'var(--primary)' : 'var(--text-primary)' }}>
+                      {day.getDate()}
+                    </span>
+                    {appts.length > 0 && (
+                      <span className="badge badge-requested" style={{ fontSize: '0.65rem', padding: '1px 6px' }}>
+                        {appts.length}
+                      </span>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginTop: '6px' }}>
+                    {appts.slice(0, 2).map((appt) => (
+                      <div
+                        key={appt.id}
+                        style={{
+                          fontSize: '0.65rem',
+                          padding: '2px 4px',
+                          borderRadius: '4px',
+                          backgroundColor: 'var(--bg-surface)',
+                          border: '1px solid var(--border-color)',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {appt.time} {appt.customerName}
+                      </div>
+                    ))}
+                    {appts.length > 2 && (
+                      <div style={{ fontSize: '0.62rem', color: 'var(--primary)', fontWeight: 600 }}>
+                        +{appts.length - 2} more
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

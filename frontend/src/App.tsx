@@ -5,9 +5,9 @@ import { useTranslation } from 'react-i18next';
 import {
   Wrench, Users, Calendar, ClipboardList, CheckSquare, FileText,
   Settings, Package, MapPin, ShieldCheck, Search, TrendingUp, Clock, Layers,
-  Sun, Moon
+  Sun, Moon, Globe
 } from 'lucide-react';
-import './i18n';
+import i18n from './i18n';
 import { useAppointments } from './hooks/useApi';
 
 // Views
@@ -24,7 +24,12 @@ import VehicleDeliveryPage from './views/VehicleDeliveryPage';
 import UserAdminPage from './views/UserAdminPage';
 import SettingsPage from './views/SettingsPage';
 import AuditLogPage from './views/AuditLogPage';
+import VehicleCheckinPage from './views/VehicleCheckinPage';
+import DviInspectionPage from './views/DviInspectionPage';
 import EstimatesPage from './views/EstimatesPage';
+import TechnicianPwaPage from './views/TechnicianPwaPage';
+import FleetManagerPage from './views/FleetManagerPage';
+import CustomerPortalPage from './views/CustomerPortalPage';
 
 // Auth Context
 interface User {
@@ -42,11 +47,17 @@ interface Tenant {
   plan: string;
 }
 
+export type ThemeStyle = 'smart-garage' | 'industrial' | 'premium';
+
 interface AuthContextType {
   user: User | null;
   tenant: Tenant | null;
   theme: 'dark' | 'light';
+  themeStyle: ThemeStyle;
+  lang: string;
   toggleTheme: () => void;
+  changeThemeStyle: (style: ThemeStyle) => void;
+  changeLanguage: (lng: string) => void;
   login: (user: User) => void;
   logout: () => void;
 }
@@ -55,7 +66,11 @@ export const AuthContext = createContext<AuthContextType>({
   user: null,
   tenant: null,
   theme: 'dark',
+  themeStyle: 'smart-garage',
+  lang: 'vi',
   toggleTheme: () => {},
+  changeThemeStyle: () => {},
+  changeLanguage: () => {},
   login: () => {},
   logout: () => {}
 });
@@ -78,7 +93,7 @@ function CalendarWrapper() {
 // Layout with sidebar + header + main content
 function AppLayout() {
   const { t } = useTranslation();
-  const { user, tenant, theme, toggleTheme, logout } = useAuth();
+  const { user, tenant, theme, themeStyle, changeThemeStyle, lang, toggleTheme, changeLanguage, logout } = useAuth();
   const [globalSearch, setGlobalSearch] = useState('');
   const navigate = useNavigate();
 
@@ -90,12 +105,12 @@ function AppLayout() {
   const navItems = [
     { path: '/', icon: <Layers size={18} />, label: t('navigation.dashboard') },
     { path: '/appointments', icon: <Calendar size={18} />, label: t('navigation.appointments') },
-    { path: '/calendar', icon: <Calendar size={18} />, label: 'Lịch Hẹn & Bay' },
+    { path: '/calendar', icon: <Calendar size={18} />, label: t('navigation.calendar') },
     { path: '/checkin', icon: <MapPin size={18} />, label: t('navigation.checkin') },
     { path: '/dvi', icon: <ClipboardList size={18} />, label: t('navigation.dvi') },
     { path: '/estimates', icon: <FileText size={18} />, label: t('navigation.estimates') },
     { path: '/workshop', icon: <CheckSquare size={18} />, label: t('navigation.workshop') },
-    { path: '/tech', icon: <Clock size={18} />, label: 'Technician PWA' },
+    { path: '/tech', icon: <Clock size={18} />, label: t('navigation.tech') },
     { path: '/parts', icon: <Package size={18} />, label: t('navigation.parts') },
     { path: '/customers', icon: <Users size={18} />, label: t('navigation.customers') },
     { path: '/vehicles', icon: <Wrench size={18} />, label: t('navigation.vehicles') },
@@ -104,7 +119,7 @@ function AppLayout() {
     { path: '/qc', icon: <ShieldCheck size={18} />, label: t('navigation.qc') },
     { path: '/delivery', icon: <MapPin size={18} />, label: t('navigation.delivery') },
     { path: '/audit', icon: <ClipboardList size={18} />, label: t('navigation.audit') },
-    { path: '/admin', icon: <Users size={18} />, label: 'Phân Quyền Staff' },
+    { path: '/admin', icon: <Users size={18} />, label: t('navigation.admin') },
     { path: '/settings', icon: <Settings size={18} />, label: t('navigation.settings') },
   ];
 
@@ -131,14 +146,14 @@ function AppLayout() {
           ))}
         </ul>
         <div className="sidebar-footer">
-          <div>Role: {user?.role}</div>
+          <div>{t('common.role')}: {user?.role}</div>
           <button
             className="btn btn-secondary"
             style={{ marginTop: '10px', width: '100%' }}
             onClick={handleLogout}
-            aria-label="Sign out"
+            aria-label={t('common.signOut')}
           >
-            Sign Out
+            {t('common.signOut')}
           </button>
         </div>
       </nav>
@@ -149,17 +164,47 @@ function AppLayout() {
             <Search size={18} className="text-muted" />
             <input
               type="text"
-              placeholder="Search VIN, license plate, customer, phone..."
+              placeholder={t('header.searchPlaceholder')}
               value={globalSearch}
               onChange={(e) => setGlobalSearch(e.target.value)}
               aria-label="Global search"
             />
           </div>
           <div className="header-right">
+            <select
+              value={themeStyle}
+              onChange={(e) => changeThemeStyle(e.target.value as ThemeStyle)}
+              title="Chọn Phong Cách Giao Diện Xưởng (Workshop Theme)"
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                padding: '6px 12px',
+                borderRadius: '20px',
+                backgroundColor: 'var(--bg-surface-elevated)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border-color)',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="smart-garage">⚡ Smart Garage</option>
+              <option value="industrial">🔧 Industrial Precision</option>
+              <option value="premium">🏎️ Porsche/Audi Showroom</option>
+            </select>
+
+            <button
+              className="theme-toggle-btn"
+              style={{ width: 'auto', padding: '0 12px', borderRadius: '20px', gap: '6px', fontSize: '0.8rem', fontWeight: 600 }}
+              onClick={() => changeLanguage(lang === 'vi' ? 'en' : 'vi')}
+              title={t('header.toggleLang')}
+              aria-label="Toggle language"
+            >
+              <Globe size={16} />
+              {lang === 'vi' ? '🇻🇳 VI' : '🇺🇸 EN'}
+            </button>
             <button
               className="theme-toggle-btn"
               onClick={toggleTheme}
-              title={theme === 'dark' ? 'Chuyển sang Giao diện Sáng' : 'Chuyển sang Giao diện Tối'}
+              title={theme === 'dark' ? t('header.toggleThemeDark') : t('header.toggleThemeLight')}
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
@@ -181,16 +226,16 @@ function AppLayout() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/appointments" element={<AppointmentsPage />} />
             <Route path="/calendar" element={<CalendarWrapper />} />
-            <Route path="/checkin" element={<div><h2>Vehicle Check-in</h2><p>Check-in wizard coming soon.</p></div>} />
-            <Route path="/dvi" element={<div><h2>Inspection (DVI)</h2><p>DVI module coming soon.</p></div>} />
+            <Route path="/checkin" element={<VehicleCheckinPage />} />
+            <Route path="/dvi" element={<DviInspectionPage />} />
             <Route path="/estimates" element={<EstimatesPage />} />
             <Route path="/workshop" element={<WorkshopBoardPage />} />
-            <Route path="/tech" element={<div><h2>Technician PWA</h2><p>Tech timer module coming soon.</p></div>} />
+            <Route path="/tech" element={<TechnicianPwaPage />} />
             <Route path="/parts" element={<PartsPage />} />
             <Route path="/customers" element={<CustomersPage />} />
             <Route path="/vehicles" element={<VehiclesPage />} />
-            <Route path="/fleet" element={<div><h2>Fleet Analytics</h2><p>Fleet module coming soon.</p></div>} />
-            <Route path="/portal" element={<div><h2>Customer Portal</h2><p>Portal module coming soon.</p></div>} />
+            <Route path="/fleet" element={<FleetManagerPage />} />
+            <Route path="/portal" element={<CustomerPortalPage />} />
             <Route path="/qc" element={<QcInspectionPage />} />
             <Route path="/delivery" element={<VehicleDeliveryPage />} />
             <Route path="/audit" element={<AuditLogPage />} />
@@ -211,6 +256,10 @@ export default function App() {
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     return (localStorage.getItem('autoforge_theme') as 'dark' | 'light') || 'dark';
   });
+  const [themeStyle, setThemeStyle] = useState<ThemeStyle>(() => {
+    return (localStorage.getItem('autoforge_theme_style') as ThemeStyle) || 'smart-garage';
+  });
+  const [lang, setLang] = useState<string>(() => i18n.language || 'vi');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -218,8 +267,24 @@ export default function App() {
     localStorage.setItem('autoforge_theme', theme);
   }, [theme]);
 
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme-style', themeStyle);
+    document.body.setAttribute('data-theme-style', themeStyle);
+    localStorage.setItem('autoforge_theme_style', themeStyle);
+  }, [themeStyle]);
+
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
+  const changeThemeStyle = (style: ThemeStyle) => {
+    setThemeStyle(style);
+  };
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    setLang(lng);
+    localStorage.setItem('autoforge_lang', lng);
   };
 
   const login = (u: User) => {
@@ -233,7 +298,7 @@ export default function App() {
   };
 
   return (
-    <AuthContext.Provider value={{ user, tenant, theme, toggleTheme, login, logout }}>
+    <AuthContext.Provider value={{ user, tenant, theme, themeStyle, lang, toggleTheme, changeThemeStyle, changeLanguage, login, logout }}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>

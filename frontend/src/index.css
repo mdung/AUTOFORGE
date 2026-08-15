@@ -79,6 +79,104 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
 }
 
+/* Automotive Workshop Theme Styles Switcher */
+
+/* Theme Style 1: ⚡ High-Tech Smart Garage (Cobalt Blue & Cyber Glow) */
+[data-theme-style="smart-garage"] {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-glow: rgba(37, 99, 235, 0.35);
+  --warning: #f97316;
+  --warning-glow: rgba(249, 115, 22, 0.25);
+  --border-focus: #3b82f6;
+  --focus-ring: rgba(59, 130, 246, 0.3);
+  --border-color: #334155;
+  --bg-main: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-surface-elevated: #334155;
+  --table-header-bg: #1e293b;
+  --table-row-hover: #334155;
+}
+
+[data-theme="light"][data-theme-style="smart-garage"] {
+  --primary: #1d4ed8;
+  --primary-hover: #1e40af;
+  --primary-glow: rgba(29, 78, 216, 0.2);
+  --warning: #ea580c;
+  --border-focus: #2563eb;
+  --focus-ring: rgba(37, 99, 235, 0.2);
+  --border-color: #cbd5e1;
+  --bg-main: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #f1f5f9;
+  --table-header-bg: #f8fafc;
+  --table-row-hover: #e2e8f0;
+}
+
+/* Theme Style 2: 🔧 Industrial Precision (Titanium Metallic & Diagnostic Amber Yellow) */
+[data-theme-style="industrial"] {
+  --primary: #eab308;
+  --primary-hover: #ca8a04;
+  --primary-glow: rgba(234, 179, 8, 0.35);
+  --info: #06b6d4;
+  --info-glow: rgba(6, 182, 212, 0.25);
+  --border-focus: #eab308;
+  --focus-ring: rgba(234, 179, 8, 0.3);
+  --border-color: #27272a;
+  --bg-main: #121214;
+  --bg-surface: #18181b;
+  --bg-surface-elevated: #27272a;
+  --table-header-bg: #18181b;
+  --table-row-hover: #27272a;
+}
+
+[data-theme="light"][data-theme-style="industrial"] {
+  --primary: #d97706;
+  --primary-hover: #b45309;
+  --primary-glow: rgba(217, 119, 6, 0.2);
+  --info: #0891b2;
+  --border-focus: #d97706;
+  --focus-ring: rgba(217, 119, 6, 0.2);
+  --border-color: #d1d5db;
+  --bg-main: #f3f4f6;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #e5e7eb;
+  --table-header-bg: #f3f4f6;
+  --table-row-hover: #e5e7eb;
+}
+
+/* Theme Style 3: 🏎️ Porsche / Audi Showroom (Obsidian Black & Porsche Sport Red) */
+[data-theme-style="premium"] {
+  --primary: #ef4444;
+  --primary-hover: #dc2626;
+  --primary-glow: rgba(239, 68, 68, 0.35);
+  --info: #3b82f6;
+  --info-glow: rgba(59, 130, 246, 0.25);
+  --border-focus: #ef4444;
+  --focus-ring: rgba(239, 68, 68, 0.3);
+  --border-color: #262626;
+  --bg-main: #0a0a0a;
+  --bg-surface: #141414;
+  --bg-surface-elevated: #1f1f1f;
+  --table-header-bg: #141414;
+  --table-row-hover: #1f1f1f;
+}
+
+[data-theme="light"][data-theme-style="premium"] {
+  --primary: #dc2626;
+  --primary-hover: #b91c1c;
+  --primary-glow: rgba(220, 38, 38, 0.2);
+  --info: #2563eb;
+  --border-focus: #dc2626;
+  --focus-ring: rgba(220, 38, 38, 0.2);
+  --border-color: #e5e5e5;
+  --bg-main: #ffffff;
+  --bg-surface: #fcfcfc;
+  --bg-surface-elevated: #f4f4f5;
+  --table-header-bg: #fafafa;
+  --table-row-hover: #f4f4f5;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function UserAdminPage() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState([
     { id: 1, email: "advisor@autoforge.com", name: "Nguyễn Văn A", role: "SERVICE_ADVISOR", status: "ACTIVE" },
     { id: 2, email: "tech@autoforge.com", name: "Trần Minh Hoàng", role: "MASTER_TECHNICIAN", status: "ACTIVE" },
@@ -18,20 +20,20 @@ export default function UserAdminPage() {
   return (
     <div>
       <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Quản Trị Nhân Viên & Phân Quyền (User Management)</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Danh sách tài khoản nhân viên, thiết lập vai trò (RBAC) và kiểm soát trạng thái truy cập</p>
+        <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>{t('admin.title')}</h1>
+        <p style={{ color: 'var(--text-secondary)' }}>{t('admin.desc')}</p>
       </div>
 
       <div className="card">
-        <h2 style={{ fontSize: '1.1rem', marginBottom: '16px' }}>Staff Directory</h2>
-        <table aria-label="Staff Directory">
+        <h2 style={{ fontSize: '1.1rem', marginBottom: '16px' }}>{t('admin.directory')}</h2>
+        <table aria-label={t('admin.directory')}>
           <thead>
             <tr>
-              <th>Họ Tên</th>
-              <th>Email</th>
-              <th>Vai Trò (Role)</th>
-              <th>Trạng Thái</th>
-              <th>Hành Động</th>
+              <th>{t('admin.name')}</th>
+              <th>{t('admin.email')}</th>
+              <th>{t('admin.role')}</th>
+              <th>{t('admin.status')}</th>
+              <th>{t('admin.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -52,7 +54,7 @@ export default function UserAdminPage() {
                 </td>
                 <td>
                   <span className={`badge badge-${u.status.toLowerCase()}`}>
-                    {u.status}
+                    {String(t(`status.${u.status}`, u.status))}
                   </span>
                 </td>
                 <td>
@@ -61,7 +63,7 @@ export default function UserAdminPage() {
                     style={{ padding: '4px 8px', fontSize: '0.75rem' }} 
                     onClick={() => toggleStatus(u.id)}
                   >
-                    {u.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                    {u.status === 'ACTIVE' ? t('admin.suspend') : t('admin.activate')}
                   </button>
                 </td>
               </tr>

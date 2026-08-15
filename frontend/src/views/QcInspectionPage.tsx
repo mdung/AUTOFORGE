@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function QcInspectionPage() {
+  const { t } = useTranslation();
   const [checklist, setChecklist] = useState([
     { id: 1, name: "Thử phanh & Hiệu năng dừng", category: "Phanh", passed: false },
     { id: 2, name: "Độ chụm & Cân bằng bánh xe", category: "Hệ thống treo", passed: false },
@@ -29,12 +31,12 @@ export default function QcInspectionPage() {
   return (
     <div style={{ maxWidth: '650px', margin: '0 auto' }}>
       <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Kiểm Tra Chất Lượng QC (Quality Control Audit)</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Báo cáo thẩm định chất lượng sau sửa chữa trước khi làm thủ tục bàn giao xe</p>
+        <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>{t('qc.title')}</h1>
+        <p style={{ color: 'var(--text-secondary)' }}>{t('qc.desc')}</p>
       </div>
 
       <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <h2 style={{ fontSize: '1.1rem' }}>QC Audit Checklist</h2>
+        <h2 style={{ fontSize: '1.1rem' }}>{t('qc.checklist')}</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {checklist.map(item => (
             <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', backgroundColor: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', borderRadius: '6px' }}>
@@ -48,22 +50,22 @@ export default function QcInspectionPage() {
         </div>
 
         <div className="input-group">
-          <span className="input-label">Giám định viên QC</span>
+          <span className="input-label">{t('qc.inspector')}</span>
           <input className="input-field" type="text" value={inspector} onChange={(e) => setInspector(e.target.value)} />
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
           <div>
-            Trạng thái QC: 
+            {t('qc.qcStatus')}: 
             <span style={{ 
               fontWeight: 700, 
               marginLeft: '6px', 
               color: qcStatus === 'PASSED' ? 'var(--success)' : (qcStatus === 'FAILED' ? 'var(--primary)' : 'var(--warning)') 
             }}>
-              {qcStatus === 'PASSED' ? 'ĐẠT (PASSED)' : (qcStatus === 'FAILED' ? 'KHÔNG ĐẠT (FAILED)' : 'ĐANG CHỜ (PENDING)')}
+              {qcStatus === 'PASSED' ? t('qc.passed') : (qcStatus === 'FAILED' ? t('qc.failed') : t('qc.pending'))}
             </span>
           </div>
-          <button className="btn btn-primary" onClick={submitQcReport}>Gửi Báo Cáo QC</button>
+          <button className="btn btn-primary" onClick={submitQcReport}>{t('qc.submit')}</button>
         </div>
       </div>
     </div>

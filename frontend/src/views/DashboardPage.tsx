@@ -102,7 +102,7 @@ export default function DashboardPage() {
                   <tr key={appt.id}>
                     <td>{appt.customerName}</td>
                     <td>{appt.vehicleDesc}</td>
-                    <td><span className={`badge badge-${appt.status?.toLowerCase()}`}>{appt.status}</span></td>
+                    <td><span className={`badge badge-${appt.status?.toLowerCase()}`}>{String(t(`status.${appt.status}`, appt.status || ''))}</span></td>
                   </tr>
                 ))}
               </tbody>
@@ -128,7 +128,7 @@ export default function DashboardPage() {
                   <tr key={ro.id}>
                     <td>{ro.roNumber}</td>
                     <td>{ro.vehicleDesc}</td>
-                    <td><span className={`badge badge-${ro.status?.toLowerCase()}`}>{ro.status}</span></td>
+                    <td><span className={`badge badge-${ro.status?.toLowerCase()}`}>{String(t(`status.${ro.status}`, ro.status || ''))}</span></td>
                   </tr>
                 ))}
               </tbody>

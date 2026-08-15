@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function AuditLogPage() {
+  const { t } = useTranslation();
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -16,7 +18,6 @@ export default function AuditLogPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        // Fallback or use real audit structure
         setLogs(data);
       }
     } catch (e) {
@@ -29,18 +30,18 @@ export default function AuditLogPage() {
   return (
     <div>
       <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Nhật Ký Giao Dịch & Hệ Thống (Audit Logs)</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Danh sách hành động ghi vết giao dịch, thay đổi dữ liệu cấu hình xưởng trên hệ thống</p>
+        <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>{t('audit.title')}</h1>
+        <p style={{ color: 'var(--text-secondary)' }}>{t('audit.desc')}</p>
       </div>
 
       <div className="card">
-        <h2 style={{ fontSize: '1.1rem', marginBottom: '16px' }}>Audit Events Registry</h2>
+        <h2 style={{ fontSize: '1.1rem', marginBottom: '16px' }}>{t('audit.registry')}</h2>
         {loading ? (
-          <p style={{ color: 'var(--text-secondary)' }}>Loading system logs...</p>
+          <p style={{ color: 'var(--text-secondary)' }}>{t('audit.loading')}</p>
         ) : (
           <div style={{ maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {logs.length === 0 ? (
-              <p style={{ color: 'var(--text-secondary)' }}>No audit events registered yet.</p>
+              <p style={{ color: 'var(--text-secondary)' }}>{t('audit.noEvents')}</p>
             ) : (
               logs.map((log: any) => (
                 <div key={log.id} style={{ border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-elevated)', padding: '12px', borderRadius: '6px', fontSize: '0.8rem' }}>

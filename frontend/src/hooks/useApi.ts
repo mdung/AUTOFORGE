@@ -22,10 +22,21 @@ export const useCustomers = (token?: string) => {
 
 export const useVehicles = (token?: string) => {
   const queryClient = useQueryClient();
+  const { data: customers = [] } = useCustomers(token);
 
   const query = useQuery({
-    queryKey: ['vehicles'],
-    queryFn: () => api.getVehicles(token),
+    queryKey: ['vehicles', customers],
+    queryFn: async () => {
+      const vehiclesList = await api.getVehicles(token);
+      if (!Array.isArray(vehiclesList)) return [];
+      return vehiclesList.map((v: any) => {
+        const owner = customers.find((c: any) => c.id === v.ownerId);
+        return {
+          ...v,
+          ownerName: v.ownerName || owner?.name || '-'
+        };
+      });
+    },
     staleTime: 5 * 60 * 1000
   });
 
@@ -72,10 +83,40 @@ export const useParts = (token?: string) => {
 
 export const useAppointments = (token?: string) => {
   const queryClient = useQueryClient();
+  const { data: customers = [] } = useCustomers(token);
+  const { data: vehicles = [] } = useVehicles(token);
 
   const query = useQuery({
-    queryKey: ['appointments'],
-    queryFn: () => api.getAppointments(token),
+    queryKey: ['appointments', customers, vehicles],
+    queryFn: async () => {
+      const apptList = await api.getAppointments(token);
+      if (!Array.isArray(apptList)) return [];
+      return apptList.map((appt: any) => {
+        const cust = customers.find((c: any) => c.id === appt.customerId);
+        const veh = vehicles.find((v: any) => v.id === appt.vehicleId);
+        
+        let dateStr = appt.date;
+        let timeStr = appt.time;
+        if (appt.scheduledTime) {
+          try {
+            const dt = new Date(appt.scheduledTime);
+            dateStr = dateStr || dt.toISOString().split('T')[0];
+            timeStr = timeStr || dt.toTimeString().substring(0, 5);
+          } catch (e) {
+            // fallback
+          }
+        }
+
+        return {
+          ...appt,
+          customerName: appt.customerName || cust?.name || 'Khách hàng',
+          vehicleDesc: appt.vehicleDesc || (veh ? `${veh.make} ${veh.model} (${veh.licensePlate})` : 'Phương tiện'),
+          date: dateStr || '2026-08-14',
+          time: timeStr || '08:30',
+          type: appt.type || appt.serviceType || 'Bảo dưỡng'
+        };
+      });
+    },
     staleTime: 5 * 60 * 1000
   });
 
@@ -91,10 +132,24 @@ export const useAppointments = (token?: string) => {
 
 export const useRepairOrders = (token?: string) => {
   const queryClient = useQueryClient();
+  const { data: customers = [] } = useCustomers(token);
+  const { data: vehicles = [] } = useVehicles(token);
 
   const query = useQuery({
-    queryKey: ['repairOrders'],
-    queryFn: () => api.getRepairOrders(token),
+    queryKey: ['repairOrders', customers, vehicles],
+    queryFn: async () => {
+      const roList = await api.getRepairOrders(token);
+      if (!Array.isArray(roList)) return [];
+      return roList.map((ro: any) => {
+        const cust = customers.find((c: any) => c.id === ro.customerId);
+        const veh = vehicles.find((v: any) => v.id === ro.vehicleId);
+        return {
+          ...ro,
+          customerName: ro.customerName || cust?.name || 'Khách hàng',
+          vehicleDesc: ro.vehicleDesc || (veh ? `${veh.make} ${veh.model} (${veh.licensePlate})` : 'Phương tiện')
+        };
+      });
+    },
     staleTime: 5 * 60 * 1000
   });
 
